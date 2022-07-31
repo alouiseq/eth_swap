@@ -51,6 +51,12 @@ contract('EthSwap', ([deployer, investor]) => {
       assert.equal(ethSwapTokenBalance.toString(), convertTokens('999900'));
       const ethSwapEthBalance = await web3.eth.getBalance(ethSwap.address);
       assert.equal(ethSwapEthBalance.toString(), convertTokens('1'));
+
+      const event = result.logs[0].args;
+      assert.equal(event.account, investor);
+      assert.equal(event.token, token.address);
+      assert.equal(event.amount.toString(), convertTokens('100').toString());
+      assert.equal(event.rate.toString(), '100');
     })
   })
 })
