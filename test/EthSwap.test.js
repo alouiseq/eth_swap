@@ -49,8 +49,36 @@ contract('EthSwap', ([deployer, investor]) => {
 
       const ethSwapTokenBalance = await token.balanceOf(ethSwap.address);
       assert.equal(ethSwapTokenBalance.toString(), convertTokens('999900'));
+
       const ethSwapEthBalance = await web3.eth.getBalance(ethSwap.address);
       assert.equal(ethSwapEthBalance.toString(), convertTokens('1'));
+
+      const event = result.logs[0].args;
+      assert.equal(event.account, investor);
+      assert.equal(event.token, token.address);
+      assert.equal(event.amount.toString(), convertTokens('100').toString());
+      assert.equal(event.rate.toString(), '100');
+    })
+  })
+
+  describe('sellTokens()', async () => {
+    let result;
+
+    before(async () => {
+      const tokens = convertTokens('100');
+      await token.approve(ethSwap.address, tokens, { from: investor })
+      result = await ethSwap.sellTokens(tokens, { from: investor });
+    })
+
+    it('Allows user to instantly sell tokens to ethSwap for a fixed price', async () => {
+      const investorBalance = await token.balanceOf(investor);
+      assert.equal(investorBalance.toString(), convertTokens('0'));
+
+      const ethSwapTokenBalance = await token.balanceOf(ethSwap.address);
+      assert.equal(ethSwapTokenBalance.toString(), convertTokens('1000000'));
+
+      const ethSwapEthBalance = await web3.eth.getBalance(ethSwap.address);
+      assert.equal(ethSwapEthBalance.toString(), convertTokens('0'));
 
       const event = result.logs[0].args;
       assert.equal(event.account, investor);
